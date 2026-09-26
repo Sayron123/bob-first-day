@@ -1,0 +1,666 @@
+# The image that attached here is a client Ticket for this project. lets start
+
+---
+
+**Status:** active  **Date:** 2026-09-26
+
+---
+
+### 👤 User
+
+The image that attached here is a client Ticket for this project. lets start
+
+---
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
+[-] Step 1 — Read the ticket
+[ ] Step 2 — Translate (approval gate)
+[ ] Step 3 — Map (parallel subagents)
+[ ] Step 4 — Plan (approval gate)
+[ ] Step 5 — Change
+[ ] Step 6 — Verify
+[ ] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+> 🔧 called: list_files
+
+
+
+> 🔧 **list_files** — .
+
+### 🤖 Assistant
+
+> 🔧 called: execute_command
+
+
+
+> 🔧 **execute_command** — New-Item -ItemType Directory -Force -Path ".bob/tickets/tasks-due-dates" | Out-Null; Write-Output "done"
+
+### 🤖 Assistant
+
+> 🔧 called: write_file
+
+Now writing the translation file and updating todos:
+
+> 🔧 **write_file** — .bob/tickets/tasks-due-dates/01-translation.md
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[-] Step 2 — Translate (approval gate)
+[ ] Step 3 — Map (parallel subagents)
+[ ] Step 4 — Plan (approval gate)
+[ ] Step 5 — Change
+[ ] Step 6 — Verify
+[ ] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+**Client means (technical):** Add an `Assignee` column and a `Due Date` column to the Tasks page data table; rows/cells whose due date falls within the next 30 calendar days should be visually highlighted.
+
+**In scope:**
+- Add `assignee` + `dueDate` fields to the Task data model and mock data (if not already present)
+- Two new columns in the TanStack Table column definitions: Assignee and Due Date
+- Visual highlight on Due Date cells when `dueDate ≤ today + 30 days`
+
+**Out of scope:** editing/reassigning tasks, server/API integration, sorting/filtering by date, any other page.
+
+**No blocking questions.**
+
+---
+
+Are we solving the same problem? **(yes / correct me)**
+
+---
+
+### 👤 User
+
+Yes. One clarification: Highlight the whole row, and only upcoming tasks (due today to 30 days) , not overdue ones.
+
+---
+
+### 🤖 Assistant
+
+> 🔧 called: apply_diff
+
+Good clarification. Updating the translation file.
+
+> 🔧 **apply_diff** — .bob/tickets/tasks-due-dates/01-translation.md
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+Now spawning the 3 parallel map subagents.
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[x] Step 2 — Translate (approval gate)
+[-] Step 3 — Map (parallel subagents)
+[ ] Step 4 — Plan (approval gate)
+[ ] Step 5 — Change
+[ ] Step 6 — Verify
+[ ] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+> 🔧 called: spawn_subagent, spawn_subagent, spawn_subagent
+
+
+
+> 🔧 **spawn_subagent** — explore
+
+> 🔧 **spawn_subagent** — explore
+
+> 🔧 **spawn_subagent** — explore
+
+### 🤖 Assistant
+
+> 🔧 called: read_file, read_file, read_file, read_file
+
+All three subagents are back. Now merging findings into the map file.
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-columns.tsx
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-table.tsx
+
+> 🔧 **read_file** — src/features/tasks/data/schema.ts
+
+> 🔧 **read_file** — src/features/tasks/data/tasks.ts
+
+### 🤖 Assistant
+
+> 🔧 called: write_file
+
+All the evidence is in. Writing the map file now.
+
+> 🔧 **write_file** — .bob/tickets/tasks-due-dates/02-map.md
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[x] Step 2 — Translate (approval gate)
+[x] Step 3 — Map (parallel subagents)
+[-] Step 4 — Plan (approval gate)
+[ ] Step 5 — Change
+[ ] Step 6 — Verify
+[ ] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+> 🔧 called: write_file
+
+
+
+> 🔧 **write_file** — # Plan — Tasks page: due dates & assignee
+
+## Changes (3 files, no new files, no new dependencies)
+
+1. `src/features/tasks/data/schema.ts` — Add `assignee: z.string()` and
+   `dueDate: z.date()` to the Zod schema so the inferred `Task` type exposes
+   both fields to the rest of the app.
+   *(Scope: "Add assignee and dueDate fields to the Task data model")*
+
+2. `src/features/tasks/components/tasks-columns.tsx` — Add two new
+   `ColumnDef<Task>` entries before the `actions` column:
+   - **Assignee** — plain text cell rendering `row.original.assignee`
+   - **Due Date** — formats `row.original.dueDate` with `date-fns`
+     `format(date, 'MMM d, yyyy')`. Already-available `date-fns` library,
+     no new dependency.
+   *(Scope: "Add two new columns: Assignee and Due Date")*
+
+3. `src/features/tasks/components/tasks-table.tsx` — Add a conditional
+   `className` to the `<TableRow>` using `cn()`. Import `isAfter`, `isBefore`,
+   `addDays`, `startOfDay` from `date-fns`. Highlight logic:
+   `today <= dueDate <= today+30` → add `'bg-amber-50 dark:bg-amber-950/20'`
+   (a soft amber tint, consistent with shadcn's warning palette).
+   *(Scope: "Highlight entire row when dueDate is today to +30 days, not overdue")*
+
+## Risk notes
+- The Zod schema change is additive; it cannot break existing columns.
+- The `dueDate` field is already generated by `faker` in `tasks.ts` as a
+  real `Date` object, so no mock data change is needed.
+- Row highlight uses only Tailwind classes already pulled in by the project.
+
+## How to verify
+- `pnpm build` — runs `tsc -b` (type-check) + Vite build; must pass clean.
+- `pnpm lint` — ESLint must pass with no new errors.
+- Manual: open the Tasks page and confirm the two new columns appear and that
+  some rows show an amber background (those with due dates in the next 30 days).
+
+
+### 🤖 Assistant
+
+**Plan — 3 files, no new dependencies:**
+
+1. [`src/features/tasks/data/schema.ts`](src/features/tasks/data/schema.ts) — Add `assignee: z.string()` and `dueDate: z.date()` to the Zod schema (mock data already has both fields; schema just doesn't expose them yet).
+
+2. [`src/features/tasks/components/tasks-columns.tsx`](src/features/tasks/components/tasks-columns.tsx) — Add **Assignee** column (plain text) and **Due Date** column (formatted with `date-fns`) before the actions column.
+
+3. [`src/features/tasks/components/tasks-table.tsx`](src/features/tasks/components/tasks-table.tsx) — Add a conditional `className` on `<TableRow>` using `cn()`: apply a soft amber highlight when `today ≤ dueDate ≤ today + 30 days`. Uses `date-fns` (already in deps).
+
+**Risk:** all additive changes; no existing behaviour removed. `pnpm build` + `pnpm lint` will verify.
+
+---
+
+**Approve this plan? (yes / change X)**
+
+---
+
+### 👤 User
+
+Not yet. adding required fields to taskSchema will break the MOCK_TASK fixture in src/features/tasks/components/task-mutate-drawer.test.tsx.(its type with `Satisfies task`). Plesase check all usages of the Task type, add the test file to thte plan , and update the risk note.
+
+---
+
+### 🤖 Assistant
+
+> 🔧 called: grep, read_file
+
+Good catch. Let me verify all usages before updating the plan.
+
+> 🔧 **read_file** — src/features/tasks/components/task-mutate-drawer.test.tsx
+
+> 🔧 **grep** — satisfies Task|: Task\b|Task\[\]|as Task"
+
+### 🤖 Assistant
+
+> 🔧 called: grep, glob
+
+
+
+> 🔧 **grep** — *.ts,*.tsx
+
+> 🔧 **glob** — src/**/*.test.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: glob, glob
+
+
+
+> 🔧 **glob** — src/**/*.test.*
+
+> 🔧 **glob** — src/**/*.spec.*
+
+### 🤖 Assistant
+
+> 🔧 called: glob, glob
+
+
+
+> 🔧 **glob** — **/*.test.*
+
+> 🔧 **glob** — **/*.spec.*
+
+### 🤖 Assistant
+
+> 🔧 called: read_file, read_file, read_file
+
+
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-mutate-drawer.test.tsx
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-multi-delete-dialog.test.tsx
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-import-dialog.test.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: grep
+
+Now I have the full picture. Let me also do a comprehensive grep for every place `Task` type from schema is imported or used:
+
+> 🔧 **grep** — *.ts,*.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: execute_command
+
+
+
+> 🔧 **execute_command** — Select-String -Path "src\features\tasks\**\*.ts","src\features\tasks\**\*.tsx" -Pattern "schema" -Recurse | Select-Object Filename, LineNumber, Line
+
+### 🤖 Assistant
+
+> 🔧 called: execute_command
+
+
+
+> 🔧 **execute_command** — Get-ChildItem -Path "src\features\tasks" -Recurse -Include "*.ts","*.tsx" | Select-String -Pattern "schema" | Select-Object Filename, LineNumber, Line
+
+### 🤖 Assistant
+
+> 🔧 called: read_file, read_file, read_file
+
+
+
+> 🔧 **read_file** — src/features/tasks/components/data-table-bulk-actions.tsx
+
+> 🔧 **read_file** — src/features/tasks/components/data-table-row-actions.tsx
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-provider.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: write_file
+
+Full picture now. Here's the complete impact analysis:
+
+**Files that use `Task` / `taskSchema` from `schema.ts`:**
+
+| File | How it uses `Task` | Impact of adding `assignee`/`dueDate` |
+|---|---|---|
+| `tasks-mutate-drawer.test.tsx:17` | `MOCK_TASK = { … } as const satisfies Task` — only 5 fields | **Breaks** — `satisfies Task` requires all non-optional fields |
+| `data-table-row-actions.tsx:29` | `taskSchema.parse(row.original)` | Safe — `row.original` comes from the real mock data which already has both fields |
+| `tasks-mutate-drawer.tsx:26` | `type Task` for the `currentRow` prop type | Safe — additive |
+| `tasks-provider.tsx:3` | `Task | null` state type | Safe — additive |
+| `tasks-columns.tsx:6` | `ColumnDef<Task>[]` | Safe — additive |
+| `tasks-table.tsx:27` | `Task[]` prop type | Safe — additive |
+| `data-table-bulk-actions.tsx:20` | `type Task` imported but only used indirectly | Safe |
+
+**Only one file breaks: `tasks-mutate-drawer.test.tsx`** — the `MOCK_TASK` fixture needs `assignee` and `dueDate` added to satisfy the updated type.
+
+Now updating the plan:
+
+> 🔧 **write_file** — # Plan — Tasks page: due dates & assignee
+
+## Changes (4 files, no new files, no new dependencies)
+
+1. `src/features/tasks/data/schema.ts` — Add `assignee: z.string()` and
+   `dueDate: z.date()` to the Zod schema so the inferred `Task` type exposes
+   both fields to the rest of the app.
+   *(Scope: "Add assignee and dueDate fields to the Task data model")*
+
+2. `src/features/tasks/components/tasks-columns.tsx` — Add two new
+   `ColumnDef<Task>` entries before the `actions` column:
+   - **Assignee** — plain text cell rendering `row.original.assignee`
+   - **Due Date** — formats `row.original.dueDate` with `date-fns`
+     `format(date, 'MMM d, yyyy')`. Already-available `date-fns` library,
+     no new dependency.
+   *(Scope: "Add two new columns: Assignee and Due Date")*
+
+3. `src/features/tasks/components/tasks-table.tsx` — Add a conditional
+   `className` to the `<TableRow>` using `cn()`. Import `isAfter`, `isBefore`,
+   `addDays`, `startOfDay` from `date-fns`. Highlight logic:
+   `today <= dueDate <= today+30` → add `'bg-amber-50 dark:bg-amber-950/20'`
+   (a soft amber tint, consistent with shadcn's warning palette).
+   *(Scope: "Highlight entire row when dueDate is today to +30 days, not overdue")*
+
+4. `src/features/tasks/components/tasks-mutate-drawer.test.tsx` — Add
+   `assignee` and `dueDate` fields to the `MOCK_TASK` fixture (line 11–17)
+   so that `as const satisfies Task` continues to type-check after the schema
+   extension. No test logic changes.
+   *(Scope: fix type break caused by item 1)*
+
+## Risk notes
+- **`taskSchema.parse(row.original)` in `data-table-row-actions.tsx:29`** — safe
+  because `row.original` is sourced from `tasks.ts` mock data, which already
+  generates `assignee` and `dueDate`; adding required fields to the schema only
+  makes the parse stricter against data that already satisfies it.
+- All other consumers of `type Task` (`tasks-provider.tsx`, `tasks-table.tsx`,
+  `tasks-columns.tsx`, `data-table-bulk-actions.tsx`) use it as a type annotation
+  only; adding fields is purely additive for them.
+- `tasks-mutate-drawer.test.tsx` is the single fixture that would break without
+  item 4 above; patching it is the complete fix.
+- Row highlight uses only Tailwind classes already pulled in by the project.
+
+## How to verify
+- `pnpm build` — runs `tsc -b` (type-check) + Vite build; must pass clean.
+- `pnpm lint` — ESLint must pass with no new errors.
+- Manual: open the Tasks page and confirm the two new columns appear and that
+  some rows show an amber background (those with due dates in the next 30 days).
+
+
+### 🤖 Assistant
+
+Updated plan — **4 files, no new dependencies:**
+
+1. [`src/features/tasks/data/schema.ts`](src/features/tasks/data/schema.ts) — add `assignee` + `dueDate` to Zod schema
+2. [`src/features/tasks/components/tasks-columns.tsx`](src/features/tasks/components/tasks-columns.tsx) — add Assignee + Due Date column defs
+3. [`src/features/tasks/components/tasks-table.tsx`](src/features/tasks/components/tasks-table.tsx) — conditional amber row highlight (today → +30 days, not overdue)
+4. [`src/features/tasks/components/tasks-mutate-drawer.test.tsx`](src/features/tasks/components/tasks-mutate-drawer.test.tsx:17) — add `assignee` + `dueDate` to `MOCK_TASK` fixture so `satisfies Task` still passes (no test logic changes)
+
+**Risk notes updated:** `taskSchema.parse(row.original)` in `data-table-row-actions.tsx` is safe because the mock data already emits both fields. All other `Task` consumers are type-annotation-only. The test file is the only break, and item 4 is the complete fix.
+
+---
+
+**Approve this plan? (yes / change X)**
+
+---
+
+### 👤 User
+
+yes
+
+---
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[x] Step 2 — Translate (approval gate)
+[x] Step 3 — Map (parallel subagents)
+[x] Step 4 — Plan (approval gate)
+[-] Step 5 — Change
+[ ] Step 6 — Verify
+[ ] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+> 🔧 called: apply_diff
+
+Making all 4 changes now.
+
+> 🔧 **apply_diff** — src/features/tasks/data/schema.ts
+
+### 🤖 Assistant
+
+> 🔧 called: apply_diff
+
+
+
+> 🔧 **apply_diff** — src/features/tasks/components/tasks-columns.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: apply_diff
+
+
+
+> 🔧 **apply_diff** — <<<<<<< SEARCH
+:start_line:1
+-------
+import { useEffect, useState } from 'react'
+=======
+import { addDays, isAfter, isBefore, startOfDay } from 'date-fns'
+import { useEffect, useState } from 'react'
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+:start_line:161
+-------
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+=======
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn({
+                    'bg-amber-50 dark:bg-amber-950/20': (() => {
+                      const due = row.original.dueDate
+                      const today = startOfDay(new Date())
+                      const limit = addDays(today, 30)
+                      return !isBefore(due, today) && !isAfter(due, limit)
+                    })(),
+                  })}
+                >
+>>>>>>> REPLACE
+
+
+### 🤖 Assistant
+
+> 🔧 called: read_file
+
+Now I need to check the type of `row.original` in `tasks-table.tsx` — it's typed as `Task[]` data but `useReactTable` is generic. Let me verify `row.original.dueDate` is accessible without a cast:
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-table.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: read_file
+
+
+
+> 🔧 **read_file** — src/features/tasks/components/tasks-table.tsx
+
+### 🤖 Assistant
+
+> 🔧 called: apply_diff
+
+`useReactTable` infers `TData = Task` from the `data: Task[]` prop, so `row.original` is typed as `Task` — `row.original.dueDate` is fine. Now fix the test fixture:
+
+> 🔧 **apply_diff** — <<<<<<< SEARCH
+:start_line:11
+-------
+const MOCK_TASK = {
+  id: 'task-1',
+  title: 'Existing task',
+  status: 'in progress',
+  label: 'feature',
+  priority: 'medium',
+} as const satisfies Task
+=======
+const MOCK_TASK = {
+  id: 'task-1',
+  title: 'Existing task',
+  status: 'in progress',
+  label: 'feature',
+  priority: 'medium',
+  assignee: 'Jane Doe',
+  dueDate: new Date('2099-01-01'),
+} satisfies Task
+>>>>>>> REPLACE
+
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+Note: dropped `as const` because `new Date(...)` is not a literal type — `satisfies Task` alone is correct here. Now run the checks.
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[x] Step 2 — Translate (approval gate)
+[x] Step 3 — Map (parallel subagents)
+[x] Step 4 — Plan (approval gate)
+[x] Step 5 — Change
+[-] Step 6 — Verify
+[ ] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+> 🔧 called: execute_command
+
+
+
+> 🔧 **execute_command** — pnpm build 2>&1
+
+### 🤖 Assistant
+
+> 🔧 called: execute_command
+
+`tsc -b` + `vite build` — clean. Now lint:
+
+> 🔧 **execute_command** — pnpm lint 2>&1
+
+### 🤖 Assistant
+
+> 🔧 called: write_file
+
+Both checks pass clean. Writing the verify file and updating the map.
+
+> 🔧 **write_file** — # Verify — Tasks page: due dates & assignee
+
+## pnpm build (tsc -b + vite build)
+```
+✓ built in 11.88s
+3974 modules transformed — no type errors, no warnings from our changes.
+```
+
+## pnpm lint (eslint)
+```
+(no output = clean pass)
+```
+
+Both checks passed with no new errors or warnings.
+
+
+### 🤖 Assistant
+
+> 🔧 called: insert_content
+
+Now append the "after" diagram and changes section to the map:
+
+> 🔧 **insert_content** — .bob/tickets/tasks-due-dates/02-map.md
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[x] Step 2 — Translate (approval gate)
+[x] Step 3 — Map (parallel subagents)
+[x] Step 4 — Plan (approval gate)
+[x] Step 5 — Change
+[x] Step 6 — Verify
+[-] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+> 🔧 called: write_file
+
+
+
+> 🔧 **write_file** — # Handoff — Tasks page: due dates & assignee
+
+## For the client (plain language)
+The Tasks page now shows two new columns: **Assignee** (who the task is assigned
+to) and **Due Date** (when it's due, formatted as e.g. "Jan 15, 2027").
+Any task due **today or within the next 30 days** is highlighted with a soft
+amber background across the entire row — making upcoming deadlines easy to spot
+at a glance. Tasks that are already overdue are not highlighted.
+
+## For the developer
+**Files changed:**
+- `src/features/tasks/data/schema.ts` — added `assignee: z.string()` and `dueDate: z.date()` to `taskSchema`
+- `src/features/tasks/components/tasks-columns.tsx` — added Assignee and Due Date `ColumnDef<Task>` entries; uses `date-fns/format`
+- `src/features/tasks/components/tasks-table.tsx` — added conditional `bg-amber-50 dark:bg-amber-950/20` className on `<TableRow>` via `cn()` + `date-fns` helpers (`startOfDay`, `addDays`, `isBefore`, `isAfter`)
+- `src/features/tasks/components/tasks-mutate-drawer.test.tsx` — added `assignee` + `dueDate` to `MOCK_TASK` fixture to satisfy the updated `Task` type
+
+**Checks run:**
+- `pnpm build` (`tsc -b && vite build`) — ✅ clean, 3974 modules, no type errors
+- `pnpm lint` (eslint) — ✅ clean, no warnings
+
+**Known limits / follow-ups:**
+- Mock data generates `dueDate` as a random future date from `faker.date.future()` with a fixed seed; in production the dates would come from a real API.
+- The highlight window (30 days) is hard-coded in `tasks-table.tsx`. If it needs to be configurable, extract it to a constant or prop.
+- No sorting/filtering by due date was added (out of scope per the ticket).
+
+**Full before/after:** `.bob/tickets/tasks-due-dates/02-map.md`
+
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
+[x] Step 1 — Read the ticket
+[x] Step 2 — Translate (approval gate)
+[x] Step 3 — Map (parallel subagents)
+[x] Step 4 — Plan (approval gate)
+[x] Step 5 — Change
+[x] Step 6 — Verify
+[x] Step 7 — Handoff
+
+
+### 🤖 Assistant
+
+Done. 4 files changed, `pnpm build` and `pnpm lint` both clean.
+
+**To see it:** start the dev server (`pnpm dev`) and navigate to the Tasks page — you'll see the new **Assignee** and **Due Date** columns, with amber-highlighted rows for any task due within the next 30 days.

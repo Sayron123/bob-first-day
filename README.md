@@ -34,12 +34,22 @@ Output per ticket lives in `.bob/tickets/<slug>/` (translation, map, plan, verif
 
 ## Results
 
+### Ticket 1: "Show assignee + due date, highlight due in 30 days" (Maria, feature request)
+
 | | Manual (no AI) | TicketLens |
 |---|---|---|
-| Time | 60 min (timeboxed) | _TBD_ |
-| Lines changed | 0 | _TBD_ |
-| Build + lint | n/a | _TBD_ |
-| Misread ticket caught before coding | — | _TBD_ |
+| Time | 60 min (timeboxed), unfinished | **~22 min**, shipped |
+| Files changed | 0 | 4 (schema, columns, table, test fixture) |
+| Build + lint | n/a | ✅ both pass on first run |
+| Scope clarified before coding | — | Highlight whole row, upcoming only (not overdue) |
+| Hidden break caught before coding | — | Test fixture broken by the type change, caught at the plan approval step and fixed in the plan |
+| Bobcoins used | — | 2.98 of 40 |
+
+Time varies with ticket size and codebase; these are measured numbers for this ticket, not a promise.
+
+### Ticket 2: "Users search is broken??" (Jordan, bug report)
+
+_In progress._
 
 ## Use it on any repo
 
