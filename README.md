@@ -34,22 +34,32 @@ Output per ticket lives in `.bob/tickets/<slug>/` (translation, map, plan, verif
 
 ## Results
 
-### Ticket 1: "Show assignee + due date, highlight due in 30 days" (Maria, feature request)
+Ticket 1: Maria, "show assignee + due date, highlight due in 30 days"
 
 | | Manual (no AI) | TicketLens |
 |---|---|---|
-| Time | 60 min (timeboxed), unfinished | **~22 min**, shipped |
-| Files changed | 0 | 4 (schema, columns, table, test fixture) |
-| Build + lint | n/a | ✅ both pass on first run |
-| Scope clarified before coding | — | Highlight whole row, upcoming only (not overdue) |
-| Hidden break caught before coding | — | Test fixture broken by the type change, caught at the plan approval step and fixed in the plan |
-| Bobcoins used | — | 2.98 of 40 |
+| Time | 60 min (timeboxed, not finished) | **~22 min**, done |
+| Lines changed | 0 | 4 files changed |
+| `pnpm build` + `pnpm lint` | n/a | ✅ both clean on first run |
+| Bob coins used | n/a | 2.98 of 40 |
+| Caught before any code changed | n/a | Scope refined at the Translate stop (highlight whole row, upcoming only). Missing test-fixture impact caught at the Plan stop; Bob then checked every `Task` usage and added the 4th file |
 
-Time varies with ticket size and codebase; these are measured numbers for this ticket, not a promise.
+What Bob found: the mock data already had `assignee` and `dueDate`, but
+the Zod schema dropped them. The fix was mostly surfacing the existing
+data, plus one test fixture that would have broken the build.
 
-### Ticket 2: "Users search is broken??" (Jordan, bug report)
+Ticket 2: Jordan, "users search is broken??" (a vague bug report)
 
-_In progress._
+| | TicketLens |
+|---|---|
+| Real cause found | Search only checked the `username` column; full name and email were never searched |
+| Files changed | 2 (plus 1 other page that uses the same table, verified with no edit needed) |
+| `pnpm build` + `pnpm lint` | ✅ both clean |
+| Bob coins used | 2.49 of 40 |
+| Caught before any code changed | Bob's first map claimed the filter was "exact match"; the developer tested the running app ("jil" already matched) and corrected it. The developer also flagged a second page using `UsersTable`; Bob verified it and added it to the plan |
+| Result | "Jill Mosciski", "jill_zulauf74@hotmail.com" and "koss" all find the right users |
+
+**Total for both tickets: 5.47 of 40 Bob coins.**
 
 ## Use it on any repo
 
